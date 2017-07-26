@@ -2,6 +2,9 @@ import os
 from flask import Flask
 from flask_jsonrpc import JSONRPC
 from auth import auth
+from models.user import UserModel
+from models.folder import FolderModel
+from models.file import FileModel
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -12,18 +15,37 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+
 @jsonrpc.method('App.index')
 @auth.login_required
 def index():
-    print(auth.username())
     return 'Welcome to Flask JSON-RPC'
 
+
 @jsonrpc.method('App.create_folder(String)-> String')
+@auth.login_required
 def create_folder(foldername):
-    return 'We create folder {0}'.format(foldername)
+    owner = UserModel.find_by_name(auth.username())
+    folder = FolderModel.find_by_name_and_owner(foldername, owner)
+    if folder:
+        return 'We already have folder with name "{}"'.format(foldername)
+    new_folder = FolderModel(foldername, owner.id)
+    new_folder.save_to_db()
+    return 'We created folder {0}'.format(foldername)
 
 @jsonrpc.method('App.delete_folder(String)-> String')
+@auth.login_required
 def delete_folder(foldername):
+    owner = UserModel.find_by_name(auth.username())
+    folder = FolderModel.find_by_name_and_owner(foldername, owner)
+    print(folder)
+    print(folder.foldername)
+    print(folder.owner_id)
+    folder.delete_from_db()
     return 'We delete folder {0}'.format(foldername)
 
 @jsonrpc.method('App.add_file_to_folder(String, String)-> String')
@@ -36,7 +58,6 @@ def delete_file_from_folder(filename, foldername):
 
 @jsonrpc.method('App.copy_file(String, String, String, Boolean)-> String')
 def copy_file(filename, source_folder, dest_folder, move):
-    print(type(move))
     if move == True:
         return 'We moved file {0} from folder {1} to folder {2}'.format(filename, source_folder, dest_folder)
     return 'We copy file {0} from folder {1} to folder {2}'.format(filename, source_folder, dest_folder)
