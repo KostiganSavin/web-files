@@ -1,12 +1,12 @@
 from db import db
 
-class FolderModel:
+class FolderModel(db.Model):
     __tablename__ = 'folders'
 
     id = db.Column(db.Integer, primary_key=True)
     foldername = db.Column(db.String(256))
-    user_id = db.Column(db.Integer)
-    # db.relationship
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    owner = db.relationship('UserModel')
 
     def __init__(self, foldername, user_id):
         self.foldername = foldername

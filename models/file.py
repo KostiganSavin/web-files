@@ -1,12 +1,13 @@
 from db import db
 
-class FileModel:
+class FileModel(db.Model):
     __tablename__ = 'files'
 
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(256))
-    folder_id = db.Column(db.Integer)
-    user_id = db.Column(db_Integer)
+    folder_id = db.Column(db.Integer, db.ForeignKey('folders.id'))
+    folder = relationship('FolderModel')
+    
 
     def __init__(self, filename, folder_id, user_id):
         self.filename = filename

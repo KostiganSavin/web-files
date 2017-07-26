@@ -1,13 +1,13 @@
 from db import db
 
-class UserModel:
+class UserModel(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    usename = db.Column(db.String(128))
+    username = db.Column(db.String(128))
     password = db.Column(db.String(80))
 
-    def __init__(self, .username, password):
+    def __init__(self, username, password):
         self.username = usernamre
         self.password = password
 
@@ -15,8 +15,11 @@ class UserModel:
         db.session.add(self)
         db.session.commit()
 
-    def find_by_name(self, username):
-        return self.query.filter_by(username=username).first()
+    @classmethod
+    def find_by_name(cls, username):
+        print(username)
+        return cls.query.filter_by(username=username).first()
 
-    def find_by_id(self, _id):
-        return self.query.filter_by(id=_id).first()
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
