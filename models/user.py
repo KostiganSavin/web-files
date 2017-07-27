@@ -8,8 +8,11 @@ class UserModel(db.Model):
     password = db.Column(db.String(80))
 
     def __init__(self, username, password):
-        self.username = usernamre
+        self.username = username
         self.password = password
+
+    def __str__(self):
+        return self.username
 
     def save_to_db(self):
         db.session.add(self)

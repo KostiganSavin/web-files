@@ -26,6 +26,15 @@ def index():
     return 'Welcome to Flask JSON-RPC'
 
 
+@jsonrpc.method('App.register(String, String) -> String')
+def register(username, password):
+    if UserModel.find_by_name(username):
+        return "User '{}' already exists".format(username)
+    user = UserModel(username, password)
+    user.save_to_db()
+    return 'User registred'
+
+
 @jsonrpc.method('App.create_folder(String)-> String')
 @auth.login_required
 def create_folder(foldername):
@@ -73,18 +82,20 @@ def delete_file_from_folder(filename, foldername):
     folder = FolderModel.find_by_name_and_owner(foldername, owner)
     file_ = FileModel.find_by_name_and_foldername(filename, folder.foldername)
     file_.delete_from_db()
-    return 'We delete file {1} from folder {0}'.format(foldername, filename)
+    return 'We delete file {0} from folder {1}'.format( filename, foldername)
 
 
-@jsonrpc.method('App.copy_file(String, String, String)-> String')
+@jsonrpc.method('App.move_file(String, String, String)-> String')
 @auth.login_required
 def move_file(filename, source_folder, dest_folder):
     owner = UserModel.find_by_name(auth.username())
     folder_from = FolderModel.find_by_name_and_owner(source_folder, owner)
     folder_to = FolderModel.find_by_name_and_owner(dest_folder, owner)
     if not folder_from:
-        return "There is not such folder and file"
-    file_ = FileModel.find_by_name_and_foldername(filename, folder.foldername)
+        return "There is not folder with name '{}'".format(source_folder)
+    file_ = FileModel.find_by_name_and_foldername(filename, folder_from)
+    if not file_:
+        return "There is no file '{}' in folder '{}'".format(filename, source_folder)
     if folder_to:
         file_.folder_id = folder_to.id
         file_.save_to_db()
@@ -98,6 +109,7 @@ def move_file(filename, source_folder, dest_folder):
 
 def file_download(filename):
     pass
+
 
 if __name__ == '__main__':
     from db import db

@@ -12,9 +12,14 @@ class FileModel(db.Model):
         self.filename = filename
         self.folder_id = folder_id
 
+    def __str__(self):
+        return self.filename
+
     @classmethod
-    def find_by_name_and_foldername(cls, filename, foldername):
-        return cls.query.filter_by(filename=filename).first()
+    def find_by_name_and_foldername(cls, filename, folder):
+        print('class F', folder.id)
+        print('class file', filename)
+        return cls.query.filter_by(filename=filename).filter_by(folder_id=folder.id).first()
 
     def save_to_db(self):
         db.session.add(self)

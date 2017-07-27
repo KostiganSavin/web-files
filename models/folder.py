@@ -13,6 +13,9 @@ class FolderModel(db.Model):
         self.foldername = foldername
         self.owner_id = owner_id
 
+    def __str__(self):
+        return self.foldername
+
     @classmethod
     def find_by_name_and_owner(cls, foldername, owner):
         return cls.query.filter_by(foldername=foldername).filter_by(owner_id=owner.id).first()
