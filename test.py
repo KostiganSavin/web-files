@@ -1,21 +1,6 @@
-import sqlite3
+import unittest
 
-connection = sqlite3.connect('data.db')
-cursor = connection.cursor()
+class testAPI(unittest.TestCase):
 
-# create_table = 'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)'
-#
-# cursor.execute(create_table)
-#
-# cursor.execute('INSERT INTO users VALUES (NULL, "kast", "hello")')
-
-result = cursor.execute('SELECT * FROM folders')
-print(result.fetchall())
-
-print('-'*50)
-
-result = cursor.execute('SELECT * FROM files')
-print(result.fetchall())
-
-connection.commit()
-connection.close()
+    def test_register_user(self):
+        self.assertEqual()

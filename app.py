@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 from flask import Flask
 from flask_jsonrpc import JSONRPC
@@ -5,6 +7,10 @@ from auth import auth
 from models.user import UserModel
 from models.folder import FolderModel
 from models.file import FileModel
+
+import unittest
+
+
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -60,13 +66,14 @@ def delete_folder(foldername):
 @auth.login_required
 def add_file_to_folder(filename, foldername):
     owner = UserModel.find_by_name(auth.username())
-    file_ = FileModel.find_by_name_and_foldername(filename, foldername)
-    if file_:
-        return 'We already have file with name "{}" in folder "{}"'.format(filename, foldername)
     folder = FolderModel.find_by_name_and_owner(foldername, owner)
     if folder:
-        file_ = FileModel(filename, folder.id)
-        file_.save_to_db()
+        file_ = FileModel.find_by_name_and_foldername(filename, folder)
+        if file_:
+            return 'We already have file with name "{}" in folder "{}"'.format(filename, foldername)
+        else:
+            file_ = FileModel(filename, folder.id)
+            file_.save_to_db()
     else:
         new_folder = FolderModel(foldername, owner.id)
         new_folder.save_to_db()
@@ -110,8 +117,14 @@ def move_file(filename, source_folder, dest_folder):
 def file_download(filename):
     pass
 
+class testAPI(unittest.TestCase):
+
+    def test_register_user(self):
+        self.assertEqual(register('user', 'password'), 'User registred')
 
 if __name__ == '__main__':
     from db import db
     db.init_app(app)
     app.run(port=5000, debug=True)
+
+    # unittest.main()

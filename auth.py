@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 from flask_httpauth import HTTPBasicAuth
 from models.user import UserModel
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from db import db
 
 class FileModel(db.Model):
@@ -17,8 +19,6 @@ class FileModel(db.Model):
 
     @classmethod
     def find_by_name_and_foldername(cls, filename, folder):
-        print('class F', folder.id)
-        print('class file', filename)
         return cls.query.filter_by(filename=filename).filter_by(folder_id=folder.id).first()
 
     def save_to_db(self):
