@@ -24,6 +24,5 @@ class FolderModel(db.Model):
         db.session.commit()
 
     def delete_from_db(self):
-        print('!delete!')
         db.session.delete(self)
         db.session.commit()

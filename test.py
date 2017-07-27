@@ -12,5 +12,10 @@ cursor = connection.cursor()
 result = cursor.execute('SELECT * FROM folders')
 print(result.fetchall())
 
+print('-'*50)
+
+result = cursor.execute('SELECT * FROM files')
+print(result.fetchall())
+
 connection.commit()
 connection.close()

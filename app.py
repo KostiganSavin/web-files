@@ -37,30 +37,64 @@ def create_folder(foldername):
     new_folder.save_to_db()
     return 'We created folder {0}'.format(foldername)
 
+
 @jsonrpc.method('App.delete_folder(String)-> String')
 @auth.login_required
 def delete_folder(foldername):
     owner = UserModel.find_by_name(auth.username())
     folder = FolderModel.find_by_name_and_owner(foldername, owner)
-    print(folder)
-    print(folder.foldername)
-    print(folder.owner_id)
     folder.delete_from_db()
     return 'We delete folder {0}'.format(foldername)
 
+
 @jsonrpc.method('App.add_file_to_folder(String, String)-> String')
+@auth.login_required
 def add_file_to_folder(filename, foldername):
-    return 'We create file {1} in folder {0}'.format(foldername, filename)
+    owner = UserModel.find_by_name(auth.username())
+    file_ = FileModel.find_by_name_and_foldername(filename, foldername)
+    if file_:
+        return 'We already have file with name "{}" in folder "{}"'.format(filename, foldername)
+    folder = FolderModel.find_by_name_and_owner(foldername, owner)
+    if folder:
+        file_ = FileModel(filename, folder.id)
+        file_.save_to_db()
+    else:
+        new_folder = FolderModel(foldername, owner.id)
+        new_folder.save_to_db()
+        file_ = FileModel(filename, new_folder.id)
+        file_.save_to_db()
+    return 'We create file {0} in folder {1}'.format(filename, foldername)
+
 
 @jsonrpc.method('App.delete_file_from_folder(String, String)-> String')
+@auth.login_required
 def delete_file_from_folder(filename, foldername):
+    owner = UserModel.find_by_name(auth.username())
+    folder = FolderModel.find_by_name_and_owner(foldername, owner)
+    file_ = FileModel.find_by_name_and_foldername(filename, folder.foldername)
+    file_.delete_from_db()
     return 'We delete file {1} from folder {0}'.format(foldername, filename)
 
-@jsonrpc.method('App.copy_file(String, String, String, Boolean)-> String')
-def copy_file(filename, source_folder, dest_folder, move):
-    if move == True:
-        return 'We moved file {0} from folder {1} to folder {2}'.format(filename, source_folder, dest_folder)
-    return 'We copy file {0} from folder {1} to folder {2}'.format(filename, source_folder, dest_folder)
+
+@jsonrpc.method('App.copy_file(String, String, String)-> String')
+@auth.login_required
+def move_file(filename, source_folder, dest_folder):
+    owner = UserModel.find_by_name(auth.username())
+    folder_from = FolderModel.find_by_name_and_owner(source_folder, owner)
+    folder_to = FolderModel.find_by_name_and_owner(dest_folder, owner)
+    if not folder_from:
+        return "There is not such folder and file"
+    file_ = FileModel.find_by_name_and_foldername(filename, folder.foldername)
+    if folder_to:
+        file_.folder_id = folder_to.id
+        file_.save_to_db()
+    else:
+        new_folder = FolderModel(dest_folder, owner.id)
+        new_folder.save_to_db()
+        file_.folder_id = new_folder.id
+        file_.save_to_db()
+    return 'We moved file {0} from folder {1} to folder {2}'.format(filename, source_folder, dest_folder)
+
 
 def file_download(filename):
     pass
